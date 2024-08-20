@@ -26,9 +26,11 @@ jobs:
         with:
           path: ~/.npm
           key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm install
       - name: Run server
         run: npm start & npx wait-on http://127.0.0.1:$PORT # $PORT is for default shell, $env:NAME is for windows shell
-
+      
       - name: Run tests
         run: npm test
 
