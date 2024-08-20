@@ -1,0 +1,43 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+#setting env variable at top level means its for all jobs
+# you can set local env variable inside jobs
+env:
+  MONGODB_DB_NAME: test
+jobs:
+  test:
+    env:
+      MONGODB_CLUSTER_ADDRESS: cluster0.racotxj.mongodb.net
+      MONGODB_USERNAME: arefin4414
+      MONGODB_PASSWORD: bWaurDqctRGJg1jS
+      PORT: 8080
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+      - name: Run server
+        run: npm start & npx wait-on http://127.0.0.1:$PORT # $PORT is for default shell, $env:NAME is for windows shell
+
+      - name: Run tests
+        run: npm test
+
+      - name: Output information
+        run: echo 'MONGODB_USERNAME ${{ env.MONGODB_USERNAME }}'
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        run: |        
+          echo 'MONGODB_USERNAME ${{ env.MONGODB_DB_NAME }}'
